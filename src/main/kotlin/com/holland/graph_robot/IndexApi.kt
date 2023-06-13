@@ -1,8 +1,7 @@
 package com.holland.graph_robot
 
-import com.holland.graph_robot.enums.Messages
-import com.holland.graph_robot.extension.I18nExt.getMessage
-import com.holland.graph_robot.extension.ServerWebExchangeExt.getLocale
+import com.holland.graph_robot.mapper.graph.PersonGMapper
+import com.holland.graph_robot.mapper.relation.PersonMapper
 import jakarta.annotation.Resource
 import org.springframework.context.MessageSource
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,9 +18,18 @@ class IndexApi {
     @Resource
     val messageSource: MessageSource? = null
 
+    @Resource
+    val personMapper: PersonMapper? = null
+
+    @Resource
+    val personGMapper: PersonGMapper? = null
+
     @GetMapping
     fun index(exchange: ServerWebExchange): Mono<Any> {
-        val message = messageSource!!.getMessage(Messages.success, locale = exchange.getLocale())
-        return Mono.just(message)
+//        val message = messageSource!!.getMessage(Messages.success, locale = exchange.getLocale())
+//        return Mono.just(message)
+        val all1 = personMapper!!.all()
+        val all = personGMapper!!.all()
+        return Mono.just(all)
     }
 }
