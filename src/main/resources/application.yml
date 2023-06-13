@@ -1,0 +1,18 @@
+server:
+  port: 24680
+spring:
+  application:
+    name: graph-robot
+  profiles:
+    active: dev
+  messages:
+    basename: lang/messages
+    encoding: UTF-8
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://114.115.212.83:3306/spring-cloud_gateway?useUnicode=true&characterEncoding=utf8&useSSL=false&autoReconnect=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+logging:
+  level:
+    com.holland.graph_robot: debug
