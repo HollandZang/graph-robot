@@ -1,4 +1,4 @@
-package com.holland.graph_robot
+package com.holland.graph_robot.api
 
 import com.alibaba.fastjson2.JSON
 import com.holland.graph_robot.mapper.graph.UserGMapper
@@ -17,13 +17,13 @@ import reactor.core.publisher.Mono
 class IndexApi {
 
     @Resource
-    val messageSource: MessageSource? = null
+    private val messageSource: MessageSource? = null
 
     @Resource
-    val userMapper: UserMapper? = null
+    private val userMapper: UserMapper? = null
 
     @Resource
-    val userGMapper: UserGMapper? = null
+    private val userGMapper: UserGMapper? = null
 
     @GetMapping
     fun index(exchange: ServerWebExchange): Mono<Any> {
