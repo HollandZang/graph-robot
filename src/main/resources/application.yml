@@ -58,7 +58,7 @@ spring:
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
-  mapper-locations: mappers/relation/*.xml,mappers/graph/*.xml
+  mapper-locations: mapper/relation/*.xml,mapper/graph/*.xml
 logging:
   level:
     com.holland.graph_robot: debug
