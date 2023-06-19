@@ -21,6 +21,6 @@ interface ChinaAreaGMapper {
     @Insert("MATCH p=()-[r:\${relationship}]->() DELETE r")
     fun delRelationship(relationship: String)
 
-    @Select("MATCH p=(a)-[r:adjoin]->(b) where a.id=#{id} return b")
-    fun findAdjoinChinaAreas(nodeA: ChinaArea): List<Any>
+    @Select("MATCH p=(a)-[r:adjoin]->(b) where a.id=#{id} return b.id as id, b.pid as pid, b.name as name,b.fullName as fullName, b.extName as extName")
+    fun findAdjoinChinaAreas(nodeA: ChinaArea): List<ChinaArea>
 }
