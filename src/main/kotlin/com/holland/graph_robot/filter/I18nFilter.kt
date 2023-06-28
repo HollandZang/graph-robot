@@ -18,9 +18,9 @@ class I18nFilter : WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val request = exchange.request
         val l = request.headers.getFirst(ReqHeaders.l.name) ?: DEF_LANGUAGE
-        val r = request.headers.getFirst(ReqHeaders.r.name) ?: DEF_LANGUAGE
+        val c = request.headers.getFirst(ReqHeaders.c.name) ?: DEF_COUNTRY
 
-        exchange.attributes["locale"] = Locale(l, r)
+        exchange.attributes["locale"] = Locale(l, c)
         return chain.filter(exchange)
     }
 
