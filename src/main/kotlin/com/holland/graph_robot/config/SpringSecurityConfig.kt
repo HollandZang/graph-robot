@@ -17,7 +17,10 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.server.SecurityWebFilterChain
+import org.springframework.security.web.server.context.SecurityContextServerWebExchange
 import org.springframework.stereotype.Component
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
@@ -49,7 +52,7 @@ class SpringSecurityConfig {
             .authorizeExchange {
                 it.pathMatchers("/login").permitAll()
                     .pathMatchers("/actuator/**").hasRole("ADMIN")
-                    .anyExchange().permitAll()
+                    .anyExchange().authenticated()
             }
             .addFilterAt(firstFilter(), SecurityWebFiltersOrder.FIRST)
             .addFilterAt(logFilter(), SecurityWebFiltersOrder.LAST)
@@ -72,7 +75,7 @@ class SpringSecurityConfig {
                     }
                 }
             }
-            chain.filter(exchange.mutate().request(request).build())
+            chain.filter(exchange)
         }
     }
 
@@ -90,8 +93,8 @@ class SpringSecurityConfig {
             }
 
             return@WebFilter ReactiveSecurityContextHolder.getContext()
-                .map { it.authentication }
-                .flatMap { authentication ->
+                .flatMap { securityContext ->
+                    val authentication = securityContext.authentication
                     DataBufferUtils.join(request.body)
                         .map { reqDataBuffer: DataBuffer -> reqDataBuffer.toString(StandardCharsets.UTF_8) }
                         .map { s: String -> s.replace("\r\n|\n".toRegex(), "") }
@@ -111,7 +114,7 @@ class SpringSecurityConfig {
 
                             val startTime = System.currentTimeMillis()
                             val originalResponse = exchange.response
-                            val decoratedResponse: ServerHttpResponseDecorator =
+                            val decoratedResponse =
                                 object : ServerHttpResponseDecorator(originalResponse) {
                                     override fun writeWith(body: Publisher<out DataBuffer>): Mono<Void> {
                                         //输出返回结果
@@ -132,7 +135,33 @@ class SpringSecurityConfig {
                                         return super.writeWith(body)
                                     }
                                 }
-                            chain.filter(exchange.mutate().response(decoratedResponse).build())
+
+//                            val decoratedRequest = object : ServerHttpRequestDecorator(exchange.request) {
+//                                override fun getBody(): Flux<DataBuffer> {
+//                                    val nettyDataBufferFactory = NettyDataBufferFactory(UnpooledByteBufAllocator(false))
+//                                    val bodyDataBuffer =
+//                                        nettyDataBufferFactory.wrap(requestBody.toByteArray())
+//                                    return Flux.just(bodyDataBuffer)
+//                                }
+//                            }
+
+                            val decoratedExchange = object :
+                                SecurityContextServerWebExchange(exchange, Mono.just(securityContext)) {
+                                override fun getFormData(): Mono<MultiValueMap<String, String>> {
+                                    val linkedMultiValueMap = LinkedMultiValueMap<String, String>()
+                                    requestBody.split("&")
+                                        .forEach {
+                                            val (k, v) = it.split("=")
+                                            linkedMultiValueMap.add(k, v)
+                                        }
+                                    return Mono.just(linkedMultiValueMap)
+                                }
+                            }
+
+                            chain.filter(
+//                                decoratedExchange.mutate().request(decoratedRequest).response(decoratedResponse).build()
+                                decoratedExchange.mutate().response(decoratedResponse).build()
+                            )
                         }
                 }
         }
