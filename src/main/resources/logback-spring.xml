@@ -10,7 +10,7 @@
               class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
-                %highlight(%d{ISO8601} %-5level) [%blue(%20.20t)] %yellow(%30.30C %-4L): %msg%n%throwable
+                %highlight(%d{ISO8601} %-5level) [%blue(%20.20t)] %yellow(%30.30C %-4L %X{traceId}): %msg%n%throwable
             </Pattern>
         </layout>
     </appender>
@@ -20,7 +20,7 @@
         <file>${LOGS}/${DASHBOARD}.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>
-                %d{ISO8601} %-5level [%20.20t] %30.30C %-4L: %msg%n%throwable
+                %d{ISO8601} %-5level [%20.20t] %30.30C %-4L %X{traceId}: %msg%n%throwable
             </Pattern>
         </encoder>
 
@@ -39,7 +39,7 @@
         <file>./logs/${CACHE}.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>
-                %d{ISO8601} %msg%n
+                %X{traceId} %d{ISO8601} %msg%n
             </Pattern>
         </encoder>
 

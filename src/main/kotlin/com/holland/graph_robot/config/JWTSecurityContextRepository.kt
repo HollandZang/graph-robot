@@ -149,6 +149,11 @@ class JWTAuthentication(
     override fun getName(): String {
         return name
     }
+
+    override fun toString(): String {
+        return "name=$name,principal='$principal',details=$details,authorities=$authorities"
+    }
+
 }
 
 enum class JWTTypes(val len: Int, val desc: String) {
