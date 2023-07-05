@@ -1,7 +1,7 @@
 package com.holland.graph_robot.domain
 
-class ChinaArea(
-    val id: Int? = null,
+data class ChinaArea(
+    val id: Int,
     val pid: Int? = null,
     val deep: Int? = null,
     val name: String? = null,

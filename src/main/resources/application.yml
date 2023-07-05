@@ -8,57 +8,20 @@ spring:
   messages:
     basename: lang/messages
     encoding: UTF-8
-  datasource:
-    type: com.alibaba.druid.pool.DruidDataSource
-    dynamic:
-      primary: relation
-      strict: true
-      datasource:
-        relation:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://114.115.212.83:3306/spring-cloud_gateway?useUnicode=true&characterEncoding=utf8&useSSL=false&autoReconnect=true&serverTimezone=Asia/Shanghai
-          username: root
-          password: root
-          druid:
-            test-while-idle: false
-            initial-size: 1
-            min-idle: 1
-            max-active: 20
-            max-wait: 60000
-            validation-query: SELECT 1 FROM DUAL
-            test-on-borrow: true
-            test-on-return: false
-            min-evictable-idle-time-millis: 25200000
-            time-between-eviction-runs-millis: 60000
-            remove-abandoned: false
-            pool-prepared-statements: true
-            max-pool-prepared-statement-per-connection-size: 20
-            log-abandoned: true
-            break-after-acquire-failure: true
-        graph:
-          driver-class-name: org.neo4j.jdbc.http.HttpDriver
-          url: jdbc:neo4j:http://114.115.212.83:7474
-          username: neo4j
-          password: JYFtM2hiUWWfnv9
-          druid:
-            test-while-idle: false
-            initial-size: 1
-            min-idle: 1
-            max-active: 20
-            max-wait: 60000
-            test-on-borrow: false
-            test-on-return: false
-            min-evictable-idle-time-millis: 25200000
-            time-between-eviction-runs-millis: 60000
-            remove-abandoned: false
-            pool-prepared-statements: true
-            max-pool-prepared-statement-per-connection-size: 20
-            log-abandoned: true
-            break-after-acquire-failure: true
-mybatis:
-  configuration:
-    map-underscore-to-camel-case: true
-  mapper-locations: mapper/relation/*.xml,mapper/graph/*.xml
+  r2dbc:
+    url: r2dbcs:mysql://114.115.212.83:3306/spring-cloud_gateway?useUnicode=true&characterEncoding=utf8&useSSL=false&autoReconnect=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+  neo4j:
+    uri: bolt://114.115.212.83:7687
+    authentication:
+      username: neo4j
+      password: JYFtM2hiUWWfnv9
+  data:
+    neo4j:
+      repositories:
+        type: reactive
 logging:
   level:
     com.holland.graph_robot: debug
+    com.holland.graph_robot.config.r2dbc.R2dbcConf: debug

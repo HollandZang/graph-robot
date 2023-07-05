@@ -2,48 +2,50 @@ package com.holland.graph_robot.api
 
 import com.holland.graph_robot.config.JWTSecurityContextRepository
 import com.holland.graph_robot.config.JWTTypes
-import com.holland.graph_robot.mapper.relation.UserMapper
+import com.holland.graph_robot.enums.Messages
+import com.holland.graph_robot.kit.R
+import com.holland.graph_robot.repository.relation.UserRepo
 import jakarta.annotation.Resource
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 
 @RequestMapping
 @RestController
 class LoginApi {
 
     @Resource
-    private val userMapper: UserMapper? = null
+    private lateinit var userRepo: UserRepo
 
     @Resource
-    private val passwordEncoder: PasswordEncoder? = null
+    private lateinit var passwordEncoder: PasswordEncoder
 
     @PostMapping("/login")
-    fun login(account: String, pwd: String): Mono<ResponseEntity<Any>> {
-        val userOptional = userMapper!!.findByAccount(account)
-        if (userOptional.isEmpty) {
-            return Mono.defer { Mono.just("账号不存在").map { ResponseEntity.status(HttpStatus.GONE).body(it) } }
-        } else {
-            val user = userOptional.get()
-
-            return if (passwordEncoder!!.matches(pwd, user.password)) {
-                Mono.defer {
-                    val jwt = JWTSecurityContextRepository.createJWT(
-                        user.loginName!!,
-                        user.username!!,
-                        roles = userMapper.roles(user.loginName)
-                    )
-                    Mono.just(JWTTypes.`Bearer `.name + jwt).map { ResponseEntity.ok().body(it) }
-                }
-            } else {
-                Mono.defer {
-                    Mono.just("账号或密码不正确").map { ResponseEntity.status(HttpStatus.BAD_REQUEST).body(it) }
+    fun login(exchange: ServerWebExchange, account: String, pwd: String): Mono<R<String>> {
+//        val copyOfContextMap = MDC.getCopyOfContextMap()
+        return userRepo.findByAccount(account)
+            .flatMap { user ->
+//                MDC.setContextMap(copyOfContextMap)
+                if (passwordEncoder.matches(pwd, user.password)) {
+                    userRepo.roles(user.loginName)
+                        .buffer().single()
+                        .map { roles ->
+                            val jwt = JWTSecurityContextRepository.createJWT(
+                                user.loginName,
+                                user.username ?: user.loginName,
+                                roles = roles
+                            )
+                            R.success(JWTTypes.`Bearer `.name + jwt)
+                        }
+                        .onErrorResume { R.failedMono(Messages.Not_found_roles, exchange) }
+                } else {
+                    R.failedMono(Messages.Account_or_pwd_is_not_correct, exchange)
                 }
             }
-        }
+            .switchIfEmpty { R.failedMono(Messages.Not_found_account, exchange) }
     }
 }

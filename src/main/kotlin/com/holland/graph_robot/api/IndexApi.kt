@@ -1,7 +1,8 @@
 package com.holland.graph_robot.api
 
-import com.holland.graph_robot.mapper.graph.UserGMapper
-import com.holland.graph_robot.mapper.relation.UserMapper
+import com.holland.graph_robot.domain.User
+import com.holland.graph_robot.repository.graph.ChinaAreaGRepo
+import com.holland.graph_robot.repository.relation.UserRepo
 import jakarta.annotation.Resource
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.MessageSource
@@ -17,24 +18,24 @@ import reactor.core.publisher.Mono
 class IndexApi {
 
     @Resource
-    private val messageSource: MessageSource? = null
+    private lateinit var messageSource: MessageSource
 
     @Resource
-    private val userMapper: UserMapper? = null
+    private lateinit var applicationContext: ConfigurableApplicationContext
 
     @Resource
-    private val userGMapper: UserGMapper? = null
+    private lateinit var userRepo: UserRepo
 
     @Resource
-    private val applicationContext: ConfigurableApplicationContext? = null
+    private lateinit var chinaAreaGRepo: ChinaAreaGRepo
 
     @GetMapping
-    fun index(exchange: ServerWebExchange): Mono<Any> {
-//        val message = messageSource!!.getMessage(Messages.success, locale = exchange.getLocale())
+    fun index(exchange: ServerWebExchange): Mono<User> {
+//        val message = messageSource.getMessage(Messages.success, locale = exchange.getLocale())
 //        return Mono.just(message)
-//        val all1 = userMapper!!.all()
-        val all = userGMapper!!.all()
-        return Mono.just(all)
+
+        return userRepo.findByAccount("hollandX")
+//        return chinaAreaGRepo.findOneByName("四川")
     }
 
 }
