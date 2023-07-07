@@ -52,7 +52,7 @@ class SpringSecurityConfig {
             .authorizeExchange {
                 it.pathMatchers("/login").permitAll()
                     .pathMatchers("/actuator/**").hasRole("ADMIN")
-                    .anyExchange().authenticated()
+                    .anyExchange().permitAll()
             }
             .addFilterAt(firstFilter(), SecurityWebFiltersOrder.FIRST)
             .addFilterAt(logFilter(), SecurityWebFiltersOrder.LAST)
