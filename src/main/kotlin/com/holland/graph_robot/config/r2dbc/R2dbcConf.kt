@@ -62,7 +62,7 @@ class MyReactiveDataAccessStrategy(
                 }
             }
 
-            log.debug("$query -- $execSql")
+            log.debug("$query => $execSql")
         }
 
         return expanded

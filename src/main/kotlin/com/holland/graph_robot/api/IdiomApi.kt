@@ -1,12 +1,12 @@
 package com.holland.graph_robot.api
 
 import com.holland.graph_robot.domain.IdiomG
+import com.holland.graph_robot.kit.FileKit
 import com.holland.graph_robot.repository.graph.IdiomGRepo
 import jakarta.annotation.Resource
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.io.File
 
@@ -24,17 +24,17 @@ class IdiomApi {
         idiomGRepo.saveAll(readLines.map { IdiomG(it, listOf()) })
             .subscribe()
 
-        // TODO: 导入速度很慢，需要改成分批处理+批量插入
-        Flux.just(*readLines.toTypedArray())
-            .flatMap { word ->
-                println("当前word: $word")
-                val last = word.last()
+        val head = "word_l,word_r"
+        FileKit.newFile(head, "./data", "IdiomSolitaire.csv")
+        readLines.forEach { word ->
+            val last = word.last()
 
-                Flux.just(*readLines.toTypedArray())
-                    .filter { next -> next.first() == last }
-                    .flatMap { next -> idiomGRepo.createIdiomSolitaire(word, next) }
-            }
-            .subscribe()
+            val lines = readLines.filter { next -> next.first() == last }
+                .joinToString("\n") { next -> "$word,$next" }
+            if (lines == "") return@forEach
+            FileKit.append2File(lines, "./data", "IdiomSolitaire.csv")
+        }
+        // load csv with headers from "file:/IdiomSolitaire.csv" as line match (from:Idiom {word: line.word_l}),(to:Idiom {word:line.word_r}) create (from)-[r:IdiomSolitaire]->(to)
     }
 
     @GetMapping("/search")

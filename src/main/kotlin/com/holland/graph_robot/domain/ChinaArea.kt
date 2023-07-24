@@ -3,9 +3,11 @@ package com.holland.graph_robot.domain
 import org.springframework.data.neo4j.core.schema.Id
 import org.springframework.data.neo4j.core.schema.Node
 import org.springframework.data.neo4j.core.schema.Property
+import org.springframework.data.relational.core.mapping.Table
 
+@Table
 data class ChinaArea(
-    val id: Int,
+    @org.springframework.data.annotation.Id val id: Int,
     val pid: Int? = null,
     val deep: Int? = null,
     val name: String? = null,

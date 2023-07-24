@@ -9,11 +9,11 @@ spring:
     basename: lang/messages
     encoding: UTF-8
   r2dbc:
-    url: r2dbcs:mysql://114.115.212.83:3306/spring-cloud_gateway?useUnicode=true&characterEncoding=utf8&useSSL=false&autoReconnect=true&serverTimezone=Asia/Shanghai
+    url: r2dbcs:mysql://localhost.vv:3306/spring-cloud_gateway?useUnicode=true&characterEncoding=utf8&useSSL=false&autoReconnect=true&serverTimezone=Asia/Shanghai
     username: root
-    password: root
+    password: holland
   neo4j:
-    uri: bolt://114.115.212.83:7687
+    uri: bolt://localhost.vv:7687
     authentication:
       username: neo4j
       password: JYFtM2hiUWWfnv9
