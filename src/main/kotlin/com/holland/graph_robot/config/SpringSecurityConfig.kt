@@ -149,11 +149,12 @@ class SpringSecurityConfig {
                                 SecurityContextServerWebExchange(exchange, Mono.just(securityContext)) {
                                 override fun getFormData(): Mono<MultiValueMap<String, String>> {
                                     val linkedMultiValueMap = LinkedMultiValueMap<String, String>()
-                                    requestBody.split("&")
-                                        .forEach {
-                                            val (k, v) = it.split("=")
-                                            linkedMultiValueMap.add(k, v)
-                                        }
+                                    if ("nil" != requestBody)
+                                        requestBody.split("&")
+                                            .forEach {
+                                                val (k, v) = it.split("=")
+                                                linkedMultiValueMap.add(k, v)
+                                            }
                                     return Mono.just(linkedMultiValueMap)
                                 }
                             }

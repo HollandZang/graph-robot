@@ -12,4 +12,7 @@ interface IdiomGRepo : ReactiveNeo4jRepository<IdiomG, String> {
 
     @Query("MATCH (a:Idiom {word:\$source}) with a match (b:Idiom {word:\$target}),p=shortestpath((a)-[r:IdiomSolitaire*..20]->(b)) return nodes(p)")
     fun shortestIdiomSolitaireNodes(source: String, target: String, maxPath: Int = 20): Flux<IdiomG>
+
+    @Query("MATCH (a:Idiom {word:\$source})-[r:IdiomSolitaire]->(b:Idiom) RETURN b.word limit \$maxWord")
+    fun listNextIdiomSolitaireNodes(source: String, maxWord: Int = 10): Flux<String>
 }

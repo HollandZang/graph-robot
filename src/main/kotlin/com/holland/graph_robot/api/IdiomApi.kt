@@ -3,9 +3,11 @@ package com.holland.graph_robot.api
 import com.holland.graph_robot.domain.IdiomG
 import com.holland.graph_robot.kit.FileKit
 import com.holland.graph_robot.repository.graph.IdiomGRepo
+import com.holland.graph_robot.repository.relation.IdiomRepo
 import jakarta.annotation.Resource
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 import java.io.File
@@ -15,9 +17,12 @@ import java.io.File
 class IdiomApi {
 
     @Resource
+    private lateinit var idiomRepo: IdiomRepo
+
+    @Resource
     private lateinit var idiomGRepo: IdiomGRepo
 
-    //    @PostConstruct
+    //        @PostConstruct
     fun init() {
         val readLines = File("/Users/holland/repo/holland/graph-robot/data/THUOCL_chengyu.txt").readLines()
 
@@ -38,7 +43,7 @@ class IdiomApi {
     }
 
     @GetMapping("/search")
-    fun index(source: String, target: String): Mono<String> {
+    fun search(source: String, target: String): Mono<String> {
         if (source == target) return Mono.just("$source -> $target")
 
         return idiomGRepo.shortestIdiomSolitaireNodes(source, target)
@@ -49,5 +54,25 @@ class IdiomApi {
                 else
                     list.joinToString(" -> ") { it.word }
             }
+    }
+
+    @GetMapping("/next")
+    fun next(source: String, @RequestParam(defaultValue = "10") limit: Int): Mono<String> {
+        return source.trim().run {
+            idiomGRepo.listNextIdiomSolitaireNodes(source, limit)
+                .collectList()
+                .flatMap { list ->
+                    if (list.isEmpty()) {
+                        val last = source.trimEnd().last()
+                        val findAll = idiomRepo.list(last.toString(), limit)
+                        findAll.collectList()
+                            .map {
+                                if (it.isEmpty()) "nothing"
+                                else it.joinToString(", ") { idiom -> idiom.word }
+                            }
+                    } else
+                        Mono.just(list.joinToString(", "))
+                }
+        }
     }
 }
